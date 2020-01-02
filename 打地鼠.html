@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        table{
+            padding:50px 160px;
+        }
+        td {
+          
+            background-image:linear-gradient(45deg,#ccc,#ccc,10%);
+            width: 180px;
+            height: 180px;
+           
+        }
+        
+        .demon {
+            background-repeat:no-repeat;
+            background-image:url(demon.png);
+            position:relative;
+            z-index:1;
+            background-size:100px 100px;
+
+            animation-name:demon;
+            animation-duration:5s;
+            animation-direction:normal;
+            animation-fill-mode: forwards;
+            animation-timing-function:linear;
+        }
+        @keyframes demon{
+            0%{
+                top:500;
+                background-size:150px 150px;
+
+            }
+            50%{
+                left:50px;
+            }
+            100%{
+                top:-100px;
+                left:100px;
+            }
+        }
+        .money1 {
+            background-repeat:no-repeat;
+            background-image:url(money1.png);
+            position:relative;
+            animation-name:money1;
+            animation-duration:15s;
+            animation-direction:normal;
+            animation-fill-mode: forwards;
+            animation-timing-function:linear;
+
+        }
+        @keyframes money1{
+            0%{
+                top:0;
+
+            }
+            100%{
+                top:100px;left:50px;
+            }
+        }
+        .angel{
+            background-repeat:no-repeat;
+            background-image:url(angel.png);
+            position:relative;
+
+        }
+        body {
+            /* url(圖檔路徑) x位置 y位置, 預設樣式 */
+            cursor: url(./hammer.png) 50 50, auto;
+            background-image:url(1.jpg);
+            background-repeat: no-repeat;
+            background-size:900px 800px;
+            box-sizing:border-box;
+          
+        }
+       div img{
+           position:absolute;
+           top:-60px;
+       }
+       .title{
+        position:relative;
+        top:70px;left:40px;
+        padding:10px;
+        font-size:1em;
+        font-weight:700;
+        width:200px;
+        height:100px;
+        box-sizing:border-box;
+
+       }
+       div input{
+            background:white;
+            color:black;
+            width:120px;
+            height:120px;
+            border-radius:50%;
+            font-size:1em;
+            font-weight:900;
+            position:relative;
+            top:-100px;
+            left:750px;
+       }
+     
+          input:hover{
+              color:white;
+              background:rgb(236, 51, 51);
+              font-size:1.5em;
+          }
+          
+          
+  
+    </style>
+</head>
+<body>
+    <div>
+    <img src="Billboard.png" >
+    <div class=title> 
+        <div style="font-size:1.5em;text-align:center;position:relative;top:-10px;"> 天使賺外快</div>
+        目前得到: <span id="scoreText">0</span>元<br>
+        賺最多的是: <span id="highNameText"></span> 賺 <span id="highScoreText">0</span>元
+    </div>
+</div>
+    <table>
+        <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+    </table>
+    <div>   <input type="button" value="START" id="startBtn"></div>
+    <script>
+        let score = 0;
+        let scoreText = document.getElementById("scoreText");
+        let startBtn = document.getElementById("startBtn");
+        let tds = document.getElementsByTagName("td");
+
+        // 設定計時器的變數為 0 ，避免被 clearInterval 清掉，才可以重複利用
+        let gameTimer = 0;
+
+        let high = { name: "", score: 0 };
+        let highNameText = document.getElementById("highNameText");
+        let highScoreText = document.getElementById("highScoreText");
+
+        let highStorage = window.localStorage.getItem("highscore");
+        if(highStorage != null){
+            high = JSON.parse(highStorage);
+            highNameText.innerText = high.name;
+            highScoreText.innerText = high.score;
+        }
+
+        startBtn.onclick = () => {
+            // 將開始按鈕停用
+            startBtn.setAttribute("disabled", true);
+
+            // 分數歸 0
+            score = 0;
+            scoreText.innerText = score;
+
+            gameTimer = setInterval(game, 1500);
+            game();
+            setTimeout(()=>{
+                clearInterval(gameTimer);
+                for(let td of tds){
+                    td.classList.remove("demon");
+                    td.classList.remove("money1");
+                    td.classList.add("angel");
+                }
+                alert(`時間到，你賺 ${score} 元!`);
+                startBtn.removeAttribute("disabled");
+
+                if(score > high.score){
+                    let playerName = prompt("恭喜你目前賺最多金幣，請輸入你的名字");
+                    high.name = playerName;
+                    highNameText.innerText = playerName;
+                    high.score = score;
+                    highScoreText.innerText = score;
+
+                    // window.localStorage.setItem 只能存文字
+                    // JSON.stringify 可以將 JSON 陣列轉成文字
+                    window.localStorage.setItem("highscore", JSON.stringify(high));
+                }
+            }, 17000);
+        }
+
+        let game = () => {
+            for(let td of tds){
+                td.classList.remove("demon");
+                td.classList.remove("money1");
+                td.classList.remove("angel");
+
+            }
+            for(let i=0;i<4;i++){
+                let rand = Math.round(Math.random()*8);
+                tds[rand].classList.add("demon");
+            }
+        }
+
+        for(let td of tds) {
+            td.onclick = () => {
+                if(td.classList.contains("demon")){
+                    td.classList.remove("demon");
+                    td.classList.add("money1");
+                    score++;
+                    scoreText.innerText = score;
+                }
+            } 
+        }
+
+    </script>
+</body>
+</html>
